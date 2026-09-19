@@ -1,0 +1,7 @@
+# KDE / Dolphin metadata
+.directory
+
+# Editor temporary files
+*.kate-swp
+*.swp
+*.tmp
