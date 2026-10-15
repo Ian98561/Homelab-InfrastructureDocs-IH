@@ -22,7 +22,7 @@ SMB is used to make the storage accessible to Windows, Linux, and other compatib
 | Memory | 2 GB |
 | Networking | `vmbr0` |
 | Start at boot | Yes |
-| Address | `192.168.x.x` - Sanitized|
+| Address | `192.168.x.x` - Sanitized |
 
 The container is configured with:
 
