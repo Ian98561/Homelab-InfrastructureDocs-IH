@@ -9,7 +9,7 @@ It is installed directly on the Dell PowerEdge R510 and is responsible for:
 - Hosting Linux containers (LXC)
 - Hosting virtual machines
 - Providing virtual networking
-- Connectin guest systems to ZFS-backed storage
+- Connecting guest systems to ZFS-backed storage
 - Managing compute and memory resources
 - Providing centralized administration through the Proxmox web interface
 
@@ -17,24 +17,28 @@ It is installed directly on the Dell PowerEdge R510 and is responsible for:
 
 ## Host Information
 
-| Setting | Value|
+| Setting | Value |
 | --- | --- |
 | Platform | Proxmox VE |
 | Physical Host | Dell PowerEdge R510 |
-| Hostname | `pve' |
-| Management Address | `192.168.x.x` - Sanitzed |
+| Hostname | `pve` |
+| Management Address | `x.x.x.x` - Sanitized |
 | Address Assignment | Static |
 | CPU | 2x Intel Xeon X5670 |
 | CPU Resources | 12 cores / 24 threads |
 | Memory | 64 GB DDR3 |
 | Boot Device | 50 GB SSD |
-| Storage Controller | LSI 2008 HSA |
+| Storage Controller | LSI 2008 HBA |
 
 ### Proxmox Version
 
 **Proxmox VE:** 9.1.7
+
 **pve-manager:** 9.1.7
+
 **Running Kernel:** 6.17.13-2-pve
+
+These are the last documented version details.
 
 ---
 
@@ -46,9 +50,9 @@ The Proxmox web interface is the primary method used to manage the server.
 
 Public documentation address:
 
-`https://192.168.x.x:8006`
+`https://x.x.x.x:8006`
 
-The actual internal management address is intentionally excluded from public documenation.
+The actual internal management address is intentionally excluded from public documentation.
 
 The web interface is used for:
 
@@ -68,7 +72,7 @@ The Proxmox host is also administered through the Linux command line.
 Administrative tasks can be performed through:
 
 - Proxmox web shell
-- Local consoles
+- Local console
 - SSH
 
 The command line is commonly used for troubleshooting, checking system status, managing containers, reviewing logs, and making configuration changes.
@@ -77,7 +81,7 @@ The command line is commonly used for troubleshooting, checking system status, m
 
 ## Host Networking
 
-The Proxmox host connects to the local network through a Linux bridge. 
+The Proxmox host connects to the local network through a Linux bridge.
 
 ### Network Bridge
 
@@ -94,9 +98,9 @@ vmbr0
 |
 +--- LXC Containers
 |
-+---  Virtual Machines
++--- Virtual Machines
 
-The Proxmox management interface currntely uses a static address.
+The Proxmox management interface currently uses a static address.
 
 Exact internal addressing is documented privately and sanitized in public documentation.
 
@@ -117,13 +121,13 @@ The server contains multiple physical network interfaces.
 | Primary NIC | Connected to `vmbr0` |
 | Secondary NIC | Currently unused |
 
-Additional interfaces may be used in the future for network segmentation, management traffic, storage traffic, or redundance.
+Additional interfaces may be used in the future for network segmentation, management traffic, storage traffic, or redundancy.
 
 ---
 
 ## Virtualization
 
-Proxmox supports both Linux containers and full virtual machines
+Proxmox supports both Linux containers and full virtual machines.
 
 ### Linux Containers - LXC
 
@@ -139,13 +143,15 @@ Advantages for the current environment include:
 
 ### Virtual Machines
 
-Virtual machines are available for workloads requiring:
+Virtual machines are used for workloads requiring:
 
-- A complete virtualized operating system'
+- A complete virtualized operating system
 - Greater isolation
 - Different operating systems
 - Testing environments
-- Workloads not appropriate for LXC containerss
+- Workloads not appropriate for LXC containers
+
+GameServer1 and Joplin Server have now been deployed as dedicated Debian virtual machines.
 
 ---
 
@@ -199,11 +205,107 @@ Detailed configuration:
 
 ---
 
+### GameServer1 - Valheim
+
+**Type:** Virtual Machine
+
+**Purpose:** Dedicated multiplayer Valheim server
+
+**Operating System:** Debian 13
+
+**Resources:**
+
+| Resource | Allocation |
+| --- | --- |
+| CPU | 4 vCPU |
+| Memory | 8 GB |
+| Storage | 60 GB |
+| Networking | `vmbr0` |
+| IP Address | `x.x.x.x` |
+| Address Assignment | DHCP Reservation |
+| QEMU Guest Agent | Enabled |
+
+GameServer1 uses SteamCMD to install and manage the Valheim Dedicated Server.
+
+The server is currently started manually and still requires additional work for automated startup.
+
+Detailed configuration:
+
+`12 - GameServer1.md`
+
+---
+
+### Joplin Server
+
+**Type:** Virtual Machine
+
+**Purpose:** Self-hosted note synchronization
+
+**Operating System:** Debian
+
+**Resources:**
+
+| Resource | Allocation |
+| --- | --- |
+| VM ID | 103 |
+| CPU | 2 cores |
+| Memory | 2 GB |
+| Storage | 32 GB |
+| Networking | `vmbr0` |
+| IP Address | `x.x.x.x` |
+| Start at Boot | Yes |
+
+Joplin Server and PostgreSQL are hosted using Docker Compose inside the VM.
+
+The application is installed under:
+
+`/opt/joplin`
+
+Laptop and desktop synchronization has been configured.
+
+Detailed configuration:
+
+`07 - Joplin.md`
+
+---
+
+### CT104 - Pi-hole
+
+**Type:** LXC Container
+
+**Purpose:** Network-wide DNS filtering and local DNS records
+
+**Operating System:** Debian 13
+
+**Resources:**
+
+| Resource | Allocation |
+| --- | --- |
+| CPU | 1 core |
+| Memory | 1024 MB |
+| Swap | 512 MB |
+| Storage | 8 GB |
+| Storage Pool | TCloud |
+| Networking | `vmbr0` |
+| Address Assignment | DHCP |
+| Unprivileged | Yes |
+| Start at Boot | Yes |
+
+Pi-hole is installed directly inside the Debian container.
+
+The Eero Pro 7 uses Pi-hole through its Custom DNS configuration.
+
+Detailed configuration:
+
+`13 - Pi-Hole.md`
+
+---
+
 ## Resource Allocation
 
-Guest resources are allocated based on workload requirements rather than assigning the full physical resources of the server to individual services. 
+Guest resources are allocated based on workload requirements rather than assigning the full physical resources of the server to individual services.
 
-This allows multiple workloads to share the same physical server while maintaining separation between services. 
+This allows multiple workloads to share the same physical server while maintaining separation between services.
 
 Current server resources available:
 
@@ -221,15 +323,17 @@ Proxmox uses both local boot storage and ZFS-backed storage.
 
 ### Boot Storage
 
-The Proxmox operation system is installed on a dedicated SSD.
+The Proxmox operating system is installed on a dedicated SSD.
 
 ### Data Storage
 
 Service data is stored separately on the ZFS storage pool.
 
-This serparation prevents application data from being dependent solely on the Proxmox boot drive.
+This separation prevents application data from being dependent solely on the Proxmox boot drive.
 
 ZFS datasets can be mounted into containers when services require access to persistent storage.
+
+GameServer1 also uses a virtual disk stored on the `TCloud` pool.
 
 Detailed storage documentation:
 
@@ -259,7 +363,7 @@ Common Proxmox container management tasks can be performed from the host.
 
 ### Enter Container Shell
 
-`pct enter <PCID>`
+`pct enter <CTID>`
 
 These commands are useful when the Proxmox web interface is unavailable or when troubleshooting directly from the host.
 
@@ -281,22 +385,43 @@ Virtual machines can be managed through the Proxmox web interface or command lin
 
 `qm stop <VMID>`
 
-VM-specific documentation will be added as virtual machines are deployed.
+### Reboot VM
+
+`qm reboot <VMID>`
+
+### View VM Configuration
+
+`qm config <VMID>`
+
+VM-specific documentation is maintained separately for GameServer1 and Joplin.
 
 ---
 
 ## Service Startup
 
-Critical services are configured to start automatically with the Proxmox host.
+Important services are configured to start automatically with the Proxmox host.
 
 | Guest | Service | Start at Boot | Startup Order |
 | --- | --- | --- | --- |
 | CT100 | File Server | Yes | Default |
 | CT101 | Immich | Yes | Default |
+| CT104 | Pi-hole | Yes | Default |
+| GameServer1 | Valheim | Not verified | TBD |
+| VM103 | Joplin Server | Yes | TBD |
 
-Both containers currently- have `onboot: 1` configured.
+CT100, CT101, and CT104 have Start at Boot enabled.
 
-This allows the file server and Immich services to recover automatically after a Proxmox host reboot or power interruption without requiring each container to be started manually.
+VM103 also has Start at Boot enabled.
+
+Joplin's Docker Compose services use `restart: unless-stopped`.
+
+This allows the main services to start following a Proxmox reboot.
+
+GameServer1 still needs a systemd service for reliable automatic Valheim startup.
+
+Recovery following a complete Proxmox reboot has not yet been fully tested.
+
+Pi-hole startup should be prioritized during recovery because other devices now depend on it for DNS resolution.
 
 ---
 
@@ -306,13 +431,13 @@ Proxmox updates are installed periodically to maintain:
 
 - Security
 - Stability
-- Hardware compatibillity
+- Hardware compatibility
 - Proxmox package updates
 
-Before major configuration changes or uprgades:
+Before major configuration changes or upgrades:
 
 1. Review current system state.
-2. Confirm importtant data is backed up.
+2. Confirm important data is backed up.
 3. Review available disk space.
 4. Review release notes when performing major version upgrades.
 5. Verify guest services after the maintenance is complete.
@@ -324,8 +449,8 @@ Before major configuration changes or uprgades:
 Current management practices include:
 
 - Proxmox management interface remains internal to the home network
-- Management interfaces are not inentionally exposed directly to the Internet
-- Adminisitrative access requries authentication
+- Management interfaces are not intentionally exposed directly to the Internet
+- Administrative access requires authentication
 - Sensitive credentials are not included in public documentation
 - Remote administration will use a secure VPN-based solution if implemented
 
@@ -338,11 +463,13 @@ Proxmox guest backup procedures are still being developed.
 Planned documentation includes:
 
 - Container backups
-- Virtuial machines backups
+- Virtual machine backups
 - Proxmox configuration backup
 - ZFS data protection
 - Off-system backup storage
 - Recovery testing
+- Valheim world backups
+- Joplin PostgreSQL backups
 
 Detailed procedures will be maintained in:
 
@@ -356,37 +483,11 @@ Detailed procedures will be maintained in:
 - Configure UPS integration
 - Improve monitoring and alerting
 - Implement secure remote administration
-- Evaulate network segmentation
+- Evaluate network segmentation
 - Document guest startup order
 - Establish regular maintenance procedures
 - Test service recovery following host failure
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Configure automatic startup for GameServer1
+- Test Joplin automatic recovery following a Proxmox reboot
+- Test Pi-hole automatic recovery following a Proxmox reboot
+- Review guest startup order for DNS-dependent services

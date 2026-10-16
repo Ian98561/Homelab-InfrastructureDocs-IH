@@ -37,6 +37,8 @@ It currently provides:
 - Centralized ZFS storage
 - Network file storage
 - Self-hosted applications
+- Dedicated game server hosting
+- Self-hosted note synchronization
 
 The server was selected because its multiple drive bays, dual-CPU configuration, and large memory capacity provide enough resources to experiment with virtualization, storage, and multiple services on a single physical system.
 
@@ -54,7 +56,7 @@ The drives are configured as part of a ZFS RAIDZ2 storage pool.
 
 The logical storage configuration, datasets, redundancy, and storage decisions are documented separately in:
 
-'ZFS Storage.md'
+`04 - ZFS Storage.md`
 
 ---
 
@@ -85,7 +87,7 @@ This switch provides wired connectivity between the homelab server and the rest 
 
 Detailed network configuration is documented in:
 
-'Network Architecture.md'
+`02 - Network Architecture.md`
 
 ---
 
@@ -98,6 +100,7 @@ This server is located in my office's closet, along with the other intermediary 
 ### Power Protection
 
 UPS: Not yet implemented / Needs to be fixed
+
 - Surge Protection
 
 ### Cooling
@@ -112,57 +115,11 @@ Potential future hardware additions or improvements include:
 
 - UPS / battery backup
 - Network Configuration Establishment
-- PoE Security Camers (ReoLink)
+- PoE Security Cameras (Reolink)
 - Improved server monitoring
 - Replacement or expansion storage as needed
 - Cat6 drops instead of custom patch cables to each end device/room
 
 Long-term plans are documented in:
 
-'Future Improvements/Goals.md'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+`11 - Future Improvements & Goals.md`

@@ -38,7 +38,7 @@ The boot SSD is kept separate from the main data pool.
 
 **RAID Level:** RAIDZ2
 
-**Drive Type:** 1 TBB 7200 RPM HDDs
+**Drive Type:** 1 TB 7200 RPM HDDs
 
 ### RAIDZ2
 
@@ -46,7 +46,7 @@ RAIDZ2 provides dual-parity protection.
 
 This allows the storage pool to tolerate the failure of up to two drives without immediately losing the pool.
 
-Redudancy is intended to improve availability and fault tolerance but is not treated as a replacement for backups.
+Redundancy is intended to improve availability and fault tolerance but is not treated as a replacement for backups.
 
 ---
 
@@ -60,16 +60,28 @@ TCloud
 |
 +--- immich
 |
++--- subvol-100-disk-0
+|
++--- subvol-101-disk-0
+|
++--- VM Disks
+|
 +--- Additional datasets as services are added
 
-### Current Datasetsa
+### Current Datasets
 
 | Dataset | Purpose |
 | --- | --- |
 | `TCloud/data` | General network file storage |
-| `Tcloud/immich` | Persistent Immich photo/video data |
+| `TCloud/immich` | Persistent Immich photo/video data |
+| `TCloud/subvol-100-disk-0` | CT100 root filesystem |
+| `TCloud/subvol-101-disk-0` | CT101 root filesystem |
 
-Additional datasets may be created as new services are deployed.
+Additional datasets and virtual disks may be created as new services are deployed.
+
+GameServer1 currently uses a 60 GB virtual disk on `TCloud`.
+
+The exact Joplin VM disk allocation and storage mapping still need verification.
 
 ---
 
@@ -77,7 +89,7 @@ Additional datasets may be created as new services are deployed.
 
 Separate datasets are used for major services rather than storing all application data in a single location.
 
-This provides several advatages:
+This provides several advantages:
 
 - Easier organization
 - Independent dataset settings
@@ -116,13 +128,21 @@ TCloud
 |
 +--- TCloud/data
 |       |
-|       +--- File Server container
+|       +--- File Server Container
 |
 +--- TCloud/immich
+|       |
+|       +--- Immich Container
+|
++--- Proxmox Guest Storage
         |
-        +--- Immich Container
+        +--- Container Root Filesystems
+        |
+        +--- GameServer1 Virtual Disk
+        |
+        +--- Additional VM Storage
 
-This keeps persistent application data on the ZFS storage pool rather than inside only the container's root filesystem.
+This keeps persistent application data on the ZFS storage pool rather than only inside the container's root filesystem.
 
 ---
 
@@ -140,7 +160,7 @@ ZFS Dataset
 `TCloud/data`
 |
 |
-Proxmox Host 
+Proxmox Host
 |
 |
 LXC Mount Point
@@ -171,6 +191,36 @@ This dataset is used to separate photo and video storage from other network file
 Detailed Immich configuration is documented in:
 
 `06 - Immich.md`
+
+---
+
+## Virtual Machine Storage
+
+### GameServer1
+
+GameServer1 uses a 60 GB virtual disk stored on `TCloud`.
+
+Valheim server files and persistent world data are stored inside the Debian VM.
+
+Important paths:
+
+`/home/valheim/server`
+
+`/home/valheim/data`
+
+The world data should be backed up separately from the Steam-managed server installation.
+
+### Joplin Server
+
+Joplin Server runs inside a dedicated Debian VM.
+
+Docker Compose files are stored under:
+
+`/opt/joplin`
+
+PostgreSQL stores the application database.
+
+The exact Proxmox storage allocation and Docker database volume location still need to be verified.
 
 ---
 
@@ -213,7 +263,7 @@ This displays datasets, used capacity, available capacity, and mount points.
 
 ---
 
-## ZFS Srubs
+## ZFS Scrubs
 
 ZFS scrubs verify stored data and detect integrity problems.
 
@@ -225,7 +275,7 @@ ZFS scrubs verify stored data and detect integrity problems.
 
 `zpool status TCloud`
 
-Scrubs should be eventually scheduled and monitored as part of routine storage maintenance.
+Scrubs should eventually be scheduled and monitored as part of routine storage maintenance.
 
 ### Current Scrub Schedule
 
@@ -235,7 +285,7 @@ TBD
 
 ## Dataset Properties
 
-Dataset configuration can be review using:
+Dataset configuration can be reviewed using:
 
 `zfs get all TCloud/data`
 
@@ -243,7 +293,7 @@ or:
 
 `zfs get all TCloud/immich`
 
-Important properties that may be documented in the future include:
+Important properties include:
 
 - Compression
 - Mount point
@@ -255,7 +305,7 @@ Important properties that may be documented in the future include:
 
 ### Current Dataset Properties
 
-The current ZFS dataset configuration is:
+The last documented ZFS dataset configuration is:
 
 | Dataset | Compression | Mount Point | Record Size | Atime | Quota | Reservation |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -264,26 +314,25 @@ The current ZFS dataset configuration is:
 
 Both datasets inherit `lz4` compression from the parent `TCloud` dataset.
 
-Neither dataset currently has a quota or reservation configured.
+Neither dataset currently has a documented quota or reservation configured.
 
-The datasets currently use the default ZFS record size of `128K`, and access time
-updates (`atime`) are enabled.
+The datasets use the default ZFS record size of `128K`, and access time updates (`atime`) are enabled.
 
 ---
 
 ## Snapshots
 
-ZFS supportsd point-in-time snapshots of datasets.
+ZFS supports point-in-time snapshots of datasets.
 
 Example structure:
 
 `TCloud/data@snapshot-name`
 
-Snapshots may be used to help recober accidentally modified or deleted data.
+Snapshots may be used to help recover accidentally modified or deleted data.
 
 ### Current Snapshot Configuration
 
-Not yet implemented
+Not yet implemented.
 
 Future plans include defining:
 
@@ -301,7 +350,7 @@ Snapshots are not considered a replacement for separate backups.
 
 ### Raw Capacity
 
-Approximately 11 TB of raw HDD capacity is installed before accounting for:
+Approximately 11 TB of raw HDD capacity is documented before accounting for:
 
 - RAIDZ2 parity
 - ZFS metadata
@@ -310,7 +359,9 @@ Approximately 11 TB of raw HDD capacity is installed before accounting for:
 
 ### Current Usable Capacity
 
-Current storage capacity was verified using `zpool list` and `zfs list`.
+The last documented storage capacity was verified using `zpool list` and `zfs list`.
+
+These values are from September 2026 and should be refreshed after the addition of new virtual machines.
 
 #### Pool Capacity
 
@@ -328,19 +379,17 @@ Current storage capacity was verified using `zpool list` and `zfs list`.
 | `TCloud/subvol-100-disk-0` | 692 MB | 99.3 GB | 692 MB |
 | `TCloud/subvol-101-disk-0` | 6.51 GB | 43.5 GB | 6.51 GB |
 
-The pool has approximately **7.93 TB of usable ZFS capacity currently available**
-after RAIDZ2 redundancy and ZFS overhead are accounted for.
+The pool previously reported approximately **7.93 TB of usable ZFS capacity available** after RAIDZ2 redundancy and ZFS overhead.
 
-The main service datasets share the available capacity of the parent pool unless
-individual quotas or reservations are configured.
+The main service datasets share the available capacity of the parent pool unless individual quotas or reservations are configured.
 
 ---
 
-### Failure Handling
+## Failure Handling
 
 RAIDZ2 allows the pool to continue operating following certain disk failures, but degraded pool conditions should be addressed as soon as possible.
 
-A typical recovery process would incloud:
+A typical recovery process would include:
 
 1. Identify the failed disk using `zpool status`.
 2. Confirm the physical drive associated with the failed device.
@@ -358,7 +407,7 @@ A complete tested disk replacement procedure will be documented after the proces
 
 Important storage conditions to monitor include:
 
-- Pool health 
+- Pool health
 - Drive failures
 - Checksum errors
 - Available capacity
@@ -386,7 +435,7 @@ Potential risks include:
 - Hardware failure
 - Theft
 - Fire
-- Filsystem administration mistakes
+- Filesystem administration mistakes
 
 Important data therefore requires backups stored separately from the primary ZFS pool.
 
@@ -398,12 +447,12 @@ Backup procedures will be documented in:
 
 ## Current Limitations
 
-- Automated ZFS snapchots are not yet fully documented or implemented
+- Automated ZFS snapshots are not yet fully documented or implemented.
 - Automated pool health alerting is not yet implemented.
 - Scrub scheduling needs to be verified and documented.
-- Dataset properties need to be documented.
 - Off-system backups are still being developed.
 - Disk replacement and recovery procedures have not yet been tested and documented.
+- Current pool and dataset usage needs to be updated following the new VM deployments.
 
 ---
 
@@ -419,40 +468,3 @@ Backup procedures will be documented in:
 - Document disk replacement procedures
 - Perform and document recovery testing
 - Monitor capacity growth
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
