@@ -93,6 +93,10 @@ Steam App ID:
 
 The server was installed using SteamCMD.
 
+### October 2026 Maintenance
+
+Ran SteamCMD's update/validation operation for the dedicated-server app (`896660`). The tool reported that the app was fully installed. This was a successful update check, not proof that automatic update or restart scheduling is configured.
+
 * * *
 
 ## Directory Structure
@@ -171,6 +175,8 @@ Not yet fully implemented.
 
 The server still needs to be configured as a systemd service.
 
+An October follow-up confirmed no Valheim `systemd` unit was installed. Manual startup remained the verified approach.
+
 This would allow:
 
 - Automatic startup
@@ -202,6 +208,8 @@ External connectivity has been tested using:
 - Router port forwarding
 
 Normal port forwarding did not work reliably because the ISP uses CGNAT.
+
+A separate off-site Linux gateway has since been deployed and tested for **private** Tailscale/SSH administration. The proposed **WireGuard public game tunnel is not yet deployed**, so do not treat that gateway as an active alternative to Playit.gg for external players.
 
 * * *
 
@@ -383,6 +391,8 @@ Persistent data location:
 The world data should be backed up separately from the Steam-managed installation.
 
 Automated world backups have not yet been implemented or verified.
+
+A **one-time world backup was reported successful in October 2026**. Its existence does not establish automated schedules, off-system copies, retention, or a restore test.
 
 * * *
 

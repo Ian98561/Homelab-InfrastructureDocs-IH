@@ -316,6 +316,16 @@ The administrator password is excluded from public documentation.
 
 ## Troubleshooting
 
+### October 2026 DHCPv6/Networking Failure
+
+After Pi-hole was selected as the router's DNS resolver, a network outage occurred despite the router appearing online. The Pi-hole service process existed, but DNS requests failed while the container lacked a usable IPv4 address and default route. The file-server container exhibited a similar network startup failure.
+
+The affected Proxmox LXC network settings used IPv6 DHCP in an environment without a usable DHCPv6 response. Changing `ip6=dhcp` to `ip6=manual` restored normal IPv4 service; a local `dig @127.0.0.1 google.com` query returned `NOERROR`, and DNS resolution recovered.
+
+This is a **verified recovery for the observed incident**, not a complete cold-boot, lease-renewal, or DNS redundancy test. Pi-hole remains a single DNS dependency.
+
+---
+
 ### DNS Not Updating on Desktop
 
 Problem:
@@ -466,6 +476,7 @@ Important settings should be backed up before major changes or application upgra
 
 ## Current Limitations
 
+- File-server and Pi-hole LXC networking recovered from DHCPv6-related startup timeouts, but long-term lease/reboot reliability remains unverified.
 - Pi-hole is currently a single DNS server.
 - No secondary local DNS server has been configured.
 - Recovery after a full Proxmox restart has not been tested.

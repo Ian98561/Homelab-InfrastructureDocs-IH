@@ -159,6 +159,20 @@ Automated DNS availability alerts have not yet been configured.
 
 ---
 
+### Media Server VM
+
+The media-server VM adds several Docker Compose services: Jellyfin, qBittorrent, Radarr, Sonarr, Prowlarr, and Seerr. Current checks are manual (`qm status`, `docker compose ps`, service logs, media-mount availability, and a sample library/playback check).
+
+No dedicated alerting or verified continuous checks for failed downloads, stalled import, full storage, or unavailable media playback were established.
+
+### Off-Site Gateway
+
+The independently deployed Debian gateway was tested for Tailscale/SSH reachability, reboot recovery, Ethernet reconnection, firewall/SSH hardening, and AC-loss recovery. A successful one-time test does not equal automated monitoring.
+
+The gateway still needs reliable reachability alerts, update/drive-health reporting, and recovery/runbook checks; its off-site location and management identifiers are intentionally omitted from public docs.
+
+---
+
 ## Storage Monitoring
 
 Important conditions to check include:
@@ -230,6 +244,9 @@ Important troubleshooting events are documented separately in:
 
 ## Current Limitations
 
+- No sustained monitoring or alerts for the media VM, its Docker services, or import workflow.
+- No configured off-site gateway health/SSH/Tailscale alerting.
+- The ZFS pool was reported `DEGRADED` and needs proactive status/SMART alerting.
 - No centralized monitoring dashboard
 - No automated host alerts
 - No automated disk failure notifications
@@ -241,6 +258,9 @@ Important troubleshooting events are documented separately in:
 
 ## Planned Improvements
 
+- Alert on `DEGRADED`/`FAULTED` ZFS states and failed scrubs, with follow-up verification.
+- Monitor media VM storage mounts, Docker containers, and end-user playback availability.
+- Monitor off-site gateway reachability, Tailscale status, security updates, and storage health.
 - Implement centralized monitoring
 - Configure CPU and memory alerts
 - Add ZFS health notifications

@@ -26,12 +26,17 @@ The lab is built on a dedicated Dell PowerEdge R510 Server from a past FB market
 - Valheim dedicated Game Server (GameServer1)
 - Joplin Server for self-hosted note synchronization
 - Pi-hole for network-wide DNS filtering and local DNS
+- Media server VM running Jellyfin, qBittorrent, Radarr, Sonarr, Prowlarr, and Seerr
+- Separate off-site Debian gateway for private Tailscale/SSH administration
 
 ### In Progress
 - Valheim external connection troubleshooting and automatic startup
 - Joplin synchronization verification and secure remote access
 - Joplin and PostgreSQL backups
 - Homelab documentation updates
+- Media request-approval and import workflow verification
+- Reliability testing for Pi-hole and SMB/LXC network recovery
+- Storage redundancy restoration and backup planning
 
 ### Planned
 - Network monitoring
@@ -39,32 +44,24 @@ The lab is built on a dedicated Dell PowerEdge R510 Server from a past FB market
 - Additional self-hosted applications
 - Network configuration
 - Additional Linux testing environments
+- A separate WireGuard game-traffic tunnel through the off-site gateway
+- VPN isolation for qBittorrent traffic
 
 ---
 
 ## High-Level Architecture
 
-Internet / Router
-        |
-        |
-Network PoE Switch (TP-Link)
-        |
-        |
-        Proxmox Server
-        |
-        + - - - - ZFS Storage
-        |
-        + - - - - File Server Container (CT100)
-        |
-        + - - - - Immich Container (CT101)
-        |
-        + - - - - GameServer1 VM (Valheim)
-        |
-        + - - - - Joplin Server VM
-        |
-        + - - - - Pi-hole Container (CT104)
-        |
-        + - - - - Additional VMs / Containers
+```mermaid
+flowchart TD
+    I["Internet"] --> R["Router and wired switch"]
+    R --> P["Proxmox host"]
+    P --> Z["ZFS storage"]
+    P --> L["LXCs: file server, Immich, Pi-hole"]
+    P --> V["VMs: Valheim, Joplin, media server"]
+    A["Administrator laptop"] -->|"Tailscale SSH — verified"| G["Off-site Debian gateway"]
+```
+
+The off-site gateway is **independent physical hardware**. A future WireGuard game tunnel to the home lab is planned, not represented as a working connection in this verified-state diagram.
 
 ---
 
@@ -99,6 +96,9 @@ Detailed documentation for the environment is separated into the following:
 - Troubleshooting Logs
 - Future Improvements & Goals
 - GameServer1
+- Pi-hole
+- MediaServer1
+- Off-Site Gateway
 - Daily Logs
 
 ---
@@ -115,4 +115,12 @@ Joplin Server has also been deployed in a dedicated Debian VM using Docker Compo
 
 Pi-hole has been deployed in CT104 and is configured through the Eero Pro 7 for DNS filtering. Local DNS records have also been added to access Homelab services using hostnames. Ad blocking was successfully tested on the Linux desktop, and Joplin was updated to work with its local hostname. Additional device testing, backups, and DNS recovery testing are still needed.
 
-Additional services, monitoring, backup procedures, and network improvements are being implemented as the environment grows.
+In October, the file-server and Pi-hole containers experienced DHCPv6-related startup/network failures. Changing the LXC IPv6 setting from DHCP to manual restored IPv4 and DNS service during testing. Longer-duration recovery validation is still needed.
+
+The media-server VM is operational with Docker Compose and ZFS-backed media storage presented over VirtioFS. A test download, import, and Jellyfin playback were verified. Full Seerr request automation and qBittorrent VPN isolation remain unverified.
+
+An independent Debian gateway has been hardened for private administration, with Tailscale connectivity, key-only SSH, firewall/rollback testing, and recovery tests completed. It was deployed to a trusted off-site network and remained reachable after reboot. The proposed WireGuard game path, public forwarding, and off-site backup workflow are **not** yet implemented.
+
+The ZFS RAIDZ2 pool is **DEGRADED** after a deliberate drive removal. Historic capacity figures elsewhere in this repository are snapshots, not current health evidence; the pool requires renewed verification and a redundancy plan.
+
+Additional monitoring, backup procedures, and network improvements are being implemented as the environment grows. These pages document the last verified state through **October 27, 2026**; October 28 work remains in progress.

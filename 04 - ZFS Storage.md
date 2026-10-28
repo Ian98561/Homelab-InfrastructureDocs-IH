@@ -46,6 +46,8 @@ RAIDZ2 provides dual-parity protection.
 
 This allows the storage pool to tolerate the failure of up to two drives without immediately losing the pool.
 
+**Current qualification (October 2026):** The pool was reported `DEGRADED` after one member was intentionally removed. The nominal two-drive tolerance must not be read as two *additional* available failures while the pool is degraded. Confirm the actual vdev state and remaining redundancy with a fresh `zpool status` before any replacement or other risky storage work.
+
 Redundancy is intended to improve availability and fault tolerance but is not treated as a replacement for backups.
 
 ---
@@ -76,6 +78,7 @@ TCloud
 | `TCloud/immich` | Persistent Immich photo/video data |
 | `TCloud/subvol-100-disk-0` | CT100 root filesystem |
 | `TCloud/subvol-101-disk-0` | CT101 root filesystem |
+| Media dataset (`TCloud/media`) | Media downloads, movies, and television exposed to the media VM using VirtioFS |
 
 Additional datasets and virtual disks may be created as new services are deployed.
 
@@ -361,13 +364,13 @@ Approximately 11 TB of raw HDD capacity is documented before accounting for:
 
 The last documented storage capacity was verified using `zpool list` and `zfs list`.
 
-These values are from September 2026 and should be refreshed after the addition of new virtual machines.
+These values are from September 2026 and should be refreshed after the addition of new virtual machines and intentional drive removal. They are retained as **historical reference only**, not evidence of present health or available capacity.
 
 #### Pool Capacity
 
 | Pool | Raw Size | Allocated | Free | Capacity Used | Health |
 | --- | --- | --- | --- | --- | --- |
-| `TCloud` | 10.9 TB | 342 GB | 10.6 TB | 3% | `ONLINE` |
+| `TCloud` (September snapshot) | 10.9 TB | 342 GB | 10.6 TB | 3% | `ONLINE` **then**; `DEGRADED` reported in October |
 
 #### ZFS Dataset Capacity
 
@@ -382,6 +385,13 @@ These values are from September 2026 and should be refreshed after the addition 
 The pool previously reported approximately **7.93 TB of usable ZFS capacity available** after RAIDZ2 redundancy and ZFS overhead.
 
 The main service datasets share the available capacity of the parent pool unless individual quotas or reservations are configured.
+
+### October 2026 Status Change
+
+- One drive was deliberately removed during reuse of older equipment; the remaining disks were still accessible and no data errors were reported in the session.
+- ZFS subsequently reported the pool as **`DEGRADED`**. No resilver or return to `ONLINE` was documented.
+- The media dataset was added/used for the media VM's downloads and libraries via VirtioFS. Write access was tested after UID/GID permission alignment.
+- Do **not** assume historical raw/usable-capacity, status, or parity figures remain current. A new `zpool status -v`, `zpool list`, and `zfs list` audit is needed.
 
 ---
 
@@ -447,6 +457,8 @@ Backup procedures will be documented in:
 
 ## Current Limitations
 
+- The pool was reported `DEGRADED` after an intentional disk removal; full redundancy has not been restored or reverified.
+- Current media dataset capacity and health need fresh measurements.
 - Automated ZFS snapshots are not yet fully documented or implemented.
 - Automated pool health alerting is not yet implemented.
 - Scrub scheduling needs to be verified and documented.
@@ -458,6 +470,7 @@ Backup procedures will be documented in:
 
 ## Planned Improvements
 
+- Confirm remaining vdev redundancy and plan safe restoration of full pool health.
 - Configure scheduled ZFS scrubs
 - Implement automated snapshots
 - Establish snapshot retention policies

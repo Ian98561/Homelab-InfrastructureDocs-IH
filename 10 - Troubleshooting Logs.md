@@ -268,6 +268,49 @@ Joplin worked using the new local hostname.
 
 ---
 
+## File Server and Pi-hole — DHCPv6 Startup Timeouts (October 2026)
+
+### Problem
+
+The file-server and Pi-hole containers intermittently lost network access. Since Pi-hole supplied DNS to router-configured clients, the household experienced a DNS-related Internet outage even while the router itself reported Internet connectivity.
+
+### Investigation
+
+- Pi-hole FTL was running but DNS queries failed while the container had no usable IPv4 address/default route.
+- The affected containers had `ip6=dhcp` in their Proxmox network configuration; the network did not supply working DHCPv6 and the Debian networking service timed out.
+
+### Solution and Verification
+
+Changed the LXC IPv6 configuration from `ip6=dhcp` to `ip6=manual` for the affected containers. Both regained usable IPv4 connectivity. Pi-hole's local DNS query returned `NOERROR`, and household resolution recovered.
+
+### Remaining Work
+
+Verify long-term DHCP renewal, boot-order dependencies, and service recovery after repeated Proxmox/container restarts. The observed incident was fixed; a general network-wide reliability guarantee was not established.
+
+---
+
+## SMB — Mount Accessible but Delete Permission Denied (October 2026)
+
+The Linux workstation successfully mounted the NAS share using CIFS with systemd automount, but deletion in a folder was denied. The investigation identified the need to check underlying ZFS ACL/ownership and Samba share permissions together. No permanent permission correction was verified in the available notes.
+
+---
+
+## Off-Site Gateway — Safe Firewall Hardening (October 2026)
+
+### Problem
+
+The Debian gateway's initial nftables service was inactive, and a starter configuration contained `flush ruleset`. Starting or stopping that service without review risked removing firewall state used by Tailscale and cutting off SSH.
+
+### Solution and Verification
+
+After auditing and practicing rollback, a separate Tailscale-compatible default-deny host policy, SSH key-only access, and root-SSH restrictions were applied and verified. Timed rollback/recovery, reboot, Ethernet reconnection, cross-network SSH, and AC-loss recovery tests passed in the later hardening session.
+
+### Remaining Work
+
+Do not interpret this as a deployed public WireGuard tunnel or tested public game forwarding. These features remain pending.
+
+---
+
 ## Future Troubleshooting Entries
 
 New incidents should include:

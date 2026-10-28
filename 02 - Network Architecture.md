@@ -63,10 +63,16 @@ vmbr0
 |
 +---------- CT104 - Pi-hole
 |
++---------- Media Server VM (Docker stack)
+|
 +---------- Additional Services
 
+Separate off-site network:
+
+Gateway host -- Tailscale (private SSH administration, verified)
+             -- WireGuard (game-traffic tunnel, planned only)
+
 ---
-- Pi-hole
 
 ## Network Addressing
 
@@ -83,6 +89,7 @@ vmbr0
 | GameServer1 | `x.x.x.x` | DHCP Reservation |
 | Joplin Server | `x.x.x.x` | LAN Address |
 | Pi-hole | `x.x.x.x` | DHCP Reservation|
+| Media Server VM | `x.x.x.x` | Reserved LAN Address |
 | Additional Services | `x.x.x.x` | As required |
 
 ### Addressing Method
@@ -291,14 +298,11 @@ Detailed configuration:
 
 Remote access has been tested for GameServer1 through Playit.gg and Valheim's crossplay networking.
 
-The rest of the homelab is primarily accessed through the local network. A general VPN-based remote access setup has not yet been verified.
+**Private gateway administration is now implemented:** Tailscale is enrolled on an independent off-site Debian gateway and a Linux laptop. SSH was verified over a separate network, after reboot, and following Ethernet reconnection. The gateway remained reachable after relocation to its intended off-site network.
 
-Future remote access will most likely be provided through a VPN-based solution such as Tailscale rather than exposing management interfaces directly to the public Internet.
+This does **not** mean that all Proxmox services are currently exposed through Tailscale, nor that any public WireGuard game relay is configured. The latter remains a design goal, separate from private management access.
 
-Potential solutions being evaluated include:
-
-- Tailscale
-- VPN-based remote access
+See `15 - Off-Site Gateway.md` for the administrative path and security boundaries.
 
 ### ISP / CGNAT
 
@@ -312,7 +316,7 @@ Normal port forwarding was tested for GameServer1 but did not provide reliable e
 
 Additional findings:
 
-- Public IPv4 connectivity is available.
+- Outbound IPv4 Internet connectivity is available, but the home router does not have a directly reachable public IPv4 address.
 - No usable public IPv6 connection was detected.
 - Standard inbound port forwarding cannot bypass ISP CGNAT.
 - Playit.gg was configured as a workaround.
@@ -330,6 +334,12 @@ However, different relay locations affected connection latency.
 The free global relay had higher latency than regional routing during testing.
 
 External player connectivity and long-term reliability still need additional testing.
+
+### Planned Public Gateway Path
+
+A separate off-site system may eventually accept public game connections and forward them over a dedicated WireGuard tunnel initiated outbound from the CGNAT home network. The off-site ISP's public IPv4/router capabilities, forwarding rules, tunnel configuration, game routing, and fail-closed behavior have **not** yet been established.
+
+Tailscale for private SSH administration is a distinct, completed component; it is not proof that the WireGuard/public endpoint is operational.
 
 ---
 
@@ -442,6 +452,14 @@ Joplin's current HTTP connection should remain limited to trusted local access u
 
 ---
 
+## Media Server Networking
+
+A Debian media VM on the Proxmox bridge runs Jellyfin and related download/indexer applications. Its media data is provided through VirtioFS from the ZFS host rather than through a guest-mounted SMB share. App-to-app connectivity and playback were tested; request approval and torrent VPN isolation still require validation. The media VM is intended for trusted-network use, not arbitrary public exposure.
+
+See `14 - MediaServer1.md`.
+
+---
+
 ## Planned Network Improvements
 
 - Establish a more structured network configuration
@@ -450,7 +468,10 @@ Joplin's current HTTP connection should remain limited to trusted local access u
 - Improve local DNS reliability
 - Investigate secondary DNS redundancy
 - Confirm persistent Pi-hole addressing
-- Test DNS recovery following a Proxmox reboot- Improve remote access
+- Test DNS recovery following a Proxmox reboot
+- Improve remote access beyond the verified private gateway SSH path
+- Implement and validate a separate WireGuard game-traffic tunnel
+- Verify the off-site public IPv4/router capability before forwarding games
 - Add PoE security cameras
 - Replace long/custom patch cable runs with permanent Cat6 drops
 - Improve network monitoring

@@ -54,6 +54,8 @@ The server currently contains:
 
 The drives are configured as part of a ZFS RAIDZ2 storage pool.
 
+One previous pool member was intentionally removed during a hardware repurposing task. The pool was subsequently reported **DEGRADED**, without reported data errors at that time. The drive count alone does not establish restored redundancy; see `04 - ZFS Storage.md`.
+
 The logical storage configuration, datasets, redundancy, and storage decisions are documented separately in:
 
 `04 - ZFS Storage.md`
@@ -91,11 +93,33 @@ Detailed network configuration is documented in:
 
 ---
 
+## Off-Site Gateway Hardware
+
+**Device:** Lenovo ThinkCentre M70q Gen 3 mini PC  
+**Role:** Independently deployed Linux gateway for private remote administration
+
+| Component | Last Verified State |
+| --- | --- |
+| Processor | Intel Core i7-12700T |
+| Memory | Approximately 24 GiB |
+| OS Disk | 512 GB NVMe |
+| Secondary Disk | 1 TB HDD, left unmounted for write use |
+| Operating System | Debian 13 (minimal, CLI-only) |
+| Management | SSH over a private Tailscale network |
+
+The NVMe reported zero media errors and approximately 2% endurance consumed at the time of review. The secondary HDD showed extensive age/use indicators and **was not approved for critical backup storage**. Actual AC-power-loss reboot and remote reconnection testing later passed.
+
+The gateway is located on a separate trusted network; its exact physical location, address, and identifying details are omitted from this public document.
+
+Full configuration: `15 - Off-Site Gateway.md`.
+
+---
+
 ## Physical Infrastructure
 
 ### Server Location
 
-This server is located in my office's closet, along with the other intermediary devices.
+The primary server and networking equipment share a dedicated indoor location. Exact physical placement is omitted from public documentation.
 
 ### Power Protection
 
@@ -105,7 +129,7 @@ UPS: Not yet implemented / Needs to be fixed
 
 ### Cooling
 
-This closet has mounted rockwool insulation ceiling tiles. No further cooling solution other than air cooling has been implemented. Further plans needed.
+Dedicated cooling beyond existing air circulation has not been implemented. Cooling, airflow, and temperature monitoring remain future improvements; exact room construction and layout are omitted publicly.
 
 ---
 

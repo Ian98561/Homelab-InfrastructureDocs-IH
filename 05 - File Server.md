@@ -116,7 +116,7 @@ A dedicated Samba account is used for authenticated file access.
 
 Current user:
 
-`lan`
+`<smb-user>` (sanitized placeholder)
 
 Passwords and authentication credentials are intentionally excluded from this documentation.
 
@@ -143,6 +143,14 @@ or:
 Graphical file managers can access SMB using:
 
 `smb://x.x.x.x/<share-name>`
+
+### Persistent Linux Workstation Mount
+
+In October 2026, an authenticated CIFS/SMB share was mounted on a Linux workstation with a systemd automount configured through `/etc/fstab` (`x-systemd.automount`). The real server address, share name, credentials-file path, and client mount path are omitted from public documentation.
+
+The automount was verified as accessible after setup. A user could browse the share but lacked permission to delete some files in a folder, so the issue was narrowed to server-side Samba/ZFS ownership or ACL settings; a verified permanent fix was not recorded.
+
+This is a client-side SMB mount. Separately, the media VM receives the NAS media dataset by **VirtioFS** from Proxmox, not by mounting the same SMB share inside that VM.
 
 SMB shares can also be mounted through the Linux command line or configured to mount automatically at startup.
 
@@ -225,6 +233,18 @@ When troubleshooting permission problems, the following should be checked:
 ---
 
 ## Troubleshooting
+
+### October 2026 LXC Networking Recovery
+
+The file-server LXC temporarily lost its IPv4 address/default route during a startup/network issue. The container configuration had IPv6 DHCP enabled even though the network did not provide usable DHCPv6 service. Changing the LXC setting from `ip6=dhcp` to `ip6=manual` cleared the observed networking-service timeout and restored IPv4 access.
+
+The immediate recovery was tested, but long-term DHCP renewals and repeated reboot behavior still need validation. A change to IPv6 startup configuration is **not** a proven fix for every future SMB outage.
+
+### SMB Delete-Permission Investigation
+
+Workstation access alone did not guarantee delete permissions. When reading works but deleting fails, review both Samba share rules **and** the underlying ZFS dataset ACL/ownership for the authenticated identity. Do not broadly relax permissions without confirming the intended access model. The final resolution of this specific issue was not recorded.
+
+---
 
 ### Confirm Container Is Running
 
@@ -378,7 +398,8 @@ Backup procedures are documented separately in:
 - Off-system backups are not yet fully implemented.
 - Automated snapshots are not yet implemented.
 - Local DNS records are now configured through Pi-hole, but SMB access using the new hostname still needs verification.
-- Remote access is not currently implemented.
+- Direct public SMB exposure remains intentionally unimplemented. A separate private Tailscale gateway has been tested, but remote SMB access through it has not been verified.
+- Some delete operations on the mounted share remained blocked by Samba/ZFS permissions during testing.
 - Recovery procedures need to be tested and documented.
 - Monitoring and automated alerts are not yet implemented.
 

@@ -24,6 +24,8 @@ The storage pool uses dual-parity redundancy.
 
 This allows the pool to tolerate up to two drive failures within its RAIDZ2 configuration.
 
+The pool was reported **`DEGRADED` in October 2026** after one member was deliberately removed. Two-drive tolerance describes an intact RAIDZ2 vdev; current remaining fault tolerance must be confirmed from live `zpool status` output and must not be assumed from the RAID level alone.
+
 ### Current Backup Status
 
 - ZFS RAIDZ2 redundancy implemented
@@ -31,6 +33,8 @@ This allows the pool to tolerate up to two drive failures within its RAIDZ2 conf
 - Off-system backups not yet fully implemented
 - Proxmox guest backup procedures still being developed
 - Full recovery testing not yet completed
+- A one-time Valheim world backup was confirmed during an October maintenance session, but no verified automated schedule or restore test exists.
+- A separate off-site gateway has been deployed; encrypted off-site backup transport/storage is not yet implemented.
 
 ---
 
@@ -116,6 +120,14 @@ Pi-hole configuration backups have not yet been automated.
 
 Its configuration should be preserved so the home's DNS service can be restored following a container or host failure.
 
+### Media Server VM
+
+Back up and separately validate the Docker Compose configuration, non-secret application settings, application databases/metadata, and any irreplaceable media. The media files are on a host ZFS dataset exposed through VirtioFS, so a VM-only backup may omit them. Re-downloaded media does not substitute for a tested backup of unique files and metadata.
+
+### Off-Site Gateway
+
+Record a securely stored copy of system/network/firewall and SSH recovery procedures, Tailscale enrollment/re-enrollment steps, and a tested way to regain control without exposing secrets in GitHub. The gateway's aged secondary HDD was **not approved as a trusted backup target**. No encrypted cross-site backup job or restore test was verified.
+
 ---
 
 ## ZFS Snapshots
@@ -154,6 +166,7 @@ Planned backups include:
 - GameServer1 VM
 - Joplin Server VM
 - CT104 - Pi-hole
+- Media-server VM and its separately mounted media dataset/configuration
 
 Persistent bind-mounted datasets and application databases require separate consideration because a guest backup may not include every external storage location.
 
@@ -257,6 +270,9 @@ These procedures have not yet been fully tested.
 
 ## Current Limitations
 
+- No tested encrypted off-site backup process through the deployed gateway.
+- No verified media-stack application/configuration restore.
+- A recent one-time Valheim world backup does not constitute an automated, off-system, restore-tested backup policy.
 - No verified off-system backup process
 - No automated ZFS snapshot schedule
 - No confirmed automatic Proxmox backup schedule
@@ -269,6 +285,9 @@ These procedures have not yet been fully tested.
 
 ## Planned Improvements
 
+- Design and test encrypted off-site backups only after selecting healthy storage and validating recoverability.
+- Back up media-stack configuration/metadata separately from large media datasets.
+- Restore-test a copied Valheim world and define automated backup retention.
 - Implement automated ZFS snapshots
 - Establish Proxmox guest backups
 - Configure PostgreSQL backups

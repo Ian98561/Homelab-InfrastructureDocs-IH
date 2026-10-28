@@ -23,9 +23,11 @@ Projects are added as the environment grows.
 - [x] Test local networking
 - [x] Configure Playit.gg
 - [x] Test PlayFab crossplay
+- [x] Run a successful SteamCMD Valheim update (October 2026)
+- [x] Make/verify a one-time world backup
 - [ ] Resolve remaining external connection problems
 - [ ] Improve connection latency
-- [ ] Configure automatic Valheim startup through systemdTBD
+- [ ] Configure automatic Valheim startup through systemd
 - [ ] Configure automatic restart after failures
 - [ ] Configure regular world backups
 - [ ] Test recovery after a Proxmox reboot
@@ -62,6 +64,8 @@ Projects are added as the environment grows.
 - [x] Create local DNS records
 - [x] Configure custom internal domain
 - [x] Test Joplin with local hostname
+- [x] Recover Pi-hole/file-server container networking after DHCPv6 startup issues
+- [ ] Verify stable container DHCP renewals and repeated cold boots
 - [ ] Verify Pi-hole on additional devices
 - [ ] Confirm persistent Pi-hole addressing
 - [ ] Configure Pi-hole backups
@@ -86,6 +90,31 @@ Projects are added as the environment grows.
 - [ ] Commit and push updated Markdown files
 - [ ] Continue daily logs
 - [ ] Add updated network diagrams
+- [x] Add a dedicated media-server technical overview
+- [x] Add the off-site gateway technical overview
+
+### Media Server
+
+- [x] Deploy a Debian VM and Docker Compose media stack
+- [x] Mount ZFS-backed media data in the VM with VirtioFS
+- [x] Test media storage permissions, sample download/import, and Jellyfin playback
+- [x] Configure qBittorrent to stop completed-download seeding
+- [ ] Verify full Seerr request/approval → *arr import workflow
+- [ ] Route qBittorrent through a tested, fail-closed VPN
+- [ ] Add service availability and storage alerts
+- [ ] Define and restore-test media metadata/configuration backups
+
+### Off-Site Gateway
+
+- [x] Install minimal Debian on a separate mini PC
+- [x] Install/enroll Tailscale and verify cross-network SSH
+- [x] Harden SSH and host firewall with tested rollback
+- [x] Verify reboot, Ethernet-reconnect, and AC-loss recovery
+- [x] Deploy on a separate trusted network and verify remote SSH after reboot
+- [ ] Verify public IPv4/router forwarding capability at the off-site ISP
+- [ ] Configure the separate WireGuard game-traffic tunnel
+- [ ] Validate actual external game clients through the new route
+- [ ] Establish monitoring and encrypted off-site backups using healthy media
 
 * * *
 
@@ -98,7 +127,8 @@ Projects are added as the environment grows.
 - [x] Implement Pi-hole
 - [x] Configure local DNS
 - [ ] Improve hostname-based access
-- [ ] Configure secure remote administration
+- [x] Configure secure private administration for the off-site gateway over Tailscale
+- [ ] Expand private remote administration to other homelab services as needed
 - [ ] Continue testing ISP CGNAT workarounds
 - [ ] Improve external game server connectivity
 - [ ] Replace long patch cable runs with Cat6 drops
@@ -120,6 +150,7 @@ Projects are added as the environment grows.
 
 ## ZFS Improvements
 
+- [ ] Restore/reverify full RAIDZ2 redundancy after intentional drive removal
 - [ ] Configure scheduled scrubs
 - [ ] Implement automated snapshots
 - [ ] Establish snapshot retention
@@ -181,7 +212,8 @@ Projects are added as the environment grows.
 - [ ] Back up Immich media and database
 - [ ] Create off-system backups
 - [ ] Test restoring individual files
-- [ ] Test restoring containers- Verify Proxmox automatic startup
+- [ ] Test restoring containers
+- [ ] Verify Proxmox automatic startup
 
 - [ ] Test restoring virtual machines
 - [ ] Document full disaster recovery procedures
@@ -224,8 +256,8 @@ Projects are added as the environment grows.
 - Personal Website
     - CloudFlare domain purchase / Static IPv4 Purchase
 - HomeAssistant for Personal Cameras
-    - Have Purchased ReoLink Doorbell Camera waiting for install at home  
-        - Tough Install because front door is not already wired
+    - Consider a compatible doorbell/camera integration  
+        - Wiring and installation details omitted from the public project log
 - NBA Spurs Game Stream Site
     - Game Calendar + Notifications
     - Stream Site Integration
@@ -241,8 +273,8 @@ Projects are added as the environment grows.
     - /clip NAME - creates clips with custom name and stores for group chat
     - Look into screensharing clips instead of posting in chat
 - FULL Network Rack Install/Fix
-    - Currently Server is propped up on paint cans in office closet and switch/Router on shelf
-    - Loose Patch Cables Dropped
+    - Improve equipment mounting and cable support (exact location/layout omitted publicly)
+    - Improve cable management
     - Cat6 Runs to all Rooms
         - Actual walls look easy to fish
     - Rack/Patch Panel Purchase

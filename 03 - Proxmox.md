@@ -151,7 +151,7 @@ Virtual machines are used for workloads requiring:
 - Testing environments
 - Workloads not appropriate for LXC containers
 
-GameServer1 and Joplin Server have now been deployed as dedicated Debian virtual machines.
+GameServer1, Joplin Server, and the media server have been deployed as dedicated Debian virtual machines.
 
 ---
 
@@ -298,6 +298,27 @@ The Eero Pro 7 uses Pi-hole through its Custom DNS configuration.
 Detailed configuration:
 
 `13 - Pi-Hole.md`
+
+---
+
+### Media Server VM — Media Services
+
+**Type:** Virtual Machine  
+**Purpose:** Household media playback and download/organization stack  
+**Operating System:** Debian 13  
+**Networking:** `vmbr0` with an address reserved on the local network
+
+The media VM runs Docker Compose with Jellyfin, qBittorrent, Radarr, Sonarr, Prowlarr, and Seerr. A ZFS-backed media dataset is presented from the Proxmox host into the VM through **VirtioFS** and mounted persistently at `/mnt/media`. Application containers use a consistent `/data` view of that storage.
+
+Storage access, a test download, media import, and Jellyfin playback were verified. The exact current CPU/memory allocation has not been independently re-audited for this publication; do not infer it from another VM.
+
+Full configuration and outstanding VPN/request-workflow validation: `14 - MediaServer1.md`.
+
+---
+
+## Independent Off-Site Gateway (Not a Proxmox Guest)
+
+The off-site Debian/Tailscale gateway is a **separate physical computer**, not a Proxmox guest. It provides a verified private SSH management path but does not yet provide the planned WireGuard public game path. See `15 - Off-Site Gateway.md`.
 
 ---
 
